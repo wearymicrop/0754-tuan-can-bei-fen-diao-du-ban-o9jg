@@ -1,7 +1,7 @@
 export const text = value => String(value ?? '—').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const clock = new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
 export const localTime = value => value === undefined || value === null ? '—' : clock.format(new Date(typeof value==='number'?value*1000:value));
-const codeLabels = {TRUCK_FULL:'满载缺配',NO_VALID_STOCK:'有效库存不足',NO_ON_TIME_TRUCK:'无准点车辆',ORDER_CONFLICT:'改签争议',WINDOW_MISSING:'缺到站窗口',WINDOW_CONFLICT:'到站窗口互斥'};
+const codeLabels = {TRUCK_FULL:'满载缺配',NO_VALID_STOCK:'有效库存不足',NO_ON_TIME_TRUCK:'无准点车辆',ORDER_CONFLICT:'改签争议',WINDOW_MISSING:'缺到站窗口',WINDOW_CONFLICT:'到站窗口互斥',NO_RESCUE_TRUCK:'无准点接运车',RESCUE_FULL:'接运车余位不足',RESCUE_LOT_UNSAFE:'批号到站失效'};
 export const explanation = code => codeLabels[code] ?? '已排发';
 export function grid(headers,rows) {
   if (!rows.length) return '<p class="empty">当前没有对应记录。</p>';

@@ -18,6 +18,14 @@ class Ledger:
                 CREATE TABLE IF NOT EXISTS signatures (
                     run_id TEXT PRIMARY KEY REFERENCES runs(id), receipt TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS rescues (
+                    run_id TEXT NOT NULL REFERENCES runs(id),
+                    failed_truck TEXT NOT NULL,
+                    rescue_id TEXT NOT NULL,
+                    record TEXT NOT NULL,
+                    backup_digest TEXT,
+                    PRIMARY KEY (run_id, failed_truck)
+                );
             """)
 
     @contextmanager
@@ -62,3 +70,40 @@ class Ledger:
             if saved != data:
                 raise DomainError("ALREADY_SIGNED", "此运行已由他人签收", 409)
             return {**json.loads(saved), "reused": inserted.rowcount == 0}
+
+    def save_rescue(self, run_id, failed_truck, rescue_id, record, backup_digest):
+        """同一运行同一故障车只允许一条救援；重试返回原记录，请求漂移则冲突。"""
+        import time
+        for attempt in range(20):
+            with self.connect() as connection:
+                row = connection.execute(
+                    "SELECT rescue_id, record, backup_digest FROM rescues WHERE run_id = ? AND failed_truck = ?",
+                    (run_id, failed_truck)).fetchone()
+                if row is not None:
+                    if row[0] != rescue_id or row[2] != backup_digest:
+                        raise DomainError("RESCUE_TAKEN", "该故障车已发布救援，不能重复占位或重复耗餐", 409)
+                    return json.loads(row[1]), True
+                try:
+                    connection.execute(
+                        "INSERT INTO rescues VALUES (?, ?, ?, ?, ?)",
+                        (run_id, failed_truck, rescue_id, canonical(record), backup_digest))
+                    return record, False
+                except sqlite3.IntegrityError:
+                    # 并发救援同时插入同一主键：退避后重读，由下一轮按幂等规则裁决。
+                    time.sleep(0.02 * (attempt + 1))
+        raise DomainError("RESCUE_BUSY", "救援并发冲突，请稍后重试", 409)
+
+    def rescues_for_run(self, run_id):
+        with self.connect() as connection:
+            rows = connection.execute(
+                "SELECT record FROM rescues WHERE run_id = ? ORDER BY rowid", (run_id,)).fetchall()
+            return [json.loads(row[0]) for row in rows]
+
+    def rescue(self, run_id, failed_truck):
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT record FROM rescues WHERE run_id = ? AND failed_truck = ?",
+                (run_id, failed_truck)).fetchone()
+            if row is None:
+                raise DomainError("RESCUE_NOT_FOUND", "找不到该故障车的救援记录", 404)
+            return json.loads(row[0])

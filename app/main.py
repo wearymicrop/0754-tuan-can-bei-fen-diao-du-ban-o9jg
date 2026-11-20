@@ -12,6 +12,7 @@ from .modules.m4_capacity import handler as capacity
 from .modules.m5_allocation import handler as allocation
 from .modules.m6_reconcile import handler as reconcile
 from .modules.m7_archive import handler as archive
+from .modules.m8_rescue import handler as rescue
 from .store import Ledger
 from .web import router as web
 
@@ -25,7 +26,7 @@ def create_app(path=None):
     application = FastAPI(title=TITLE, lifespan=lifespan)
     application.add_exception_handler(DomainError, respond)
     application.mount("/static", StaticFiles(directory=ROOT / "app" / "static"), name="static")
-    for module in (orders, substitutions, windows, capacity, allocation, reconcile, archive):
+    for module in (orders, substitutions, windows, capacity, allocation, reconcile, archive, rescue):
         application.include_router(module.router)
     application.include_router(web)
 
