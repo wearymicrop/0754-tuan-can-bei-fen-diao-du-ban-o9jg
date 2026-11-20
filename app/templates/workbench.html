@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ title }}</title>
+<link rel="stylesheet" href="/static/theme.css"><link rel="stylesheet" href="/static/board.css"><script type="module" src="/static/dispatch.js"></script></head>
+<body>
+<div class="shell">
+<aside class="aisle">
+  <div class="emblem"><span aria-hidden="true" class="seal">餐</span><div><strong>团餐备份调度板</strong><small>塘岸中央食堂</small></div></div>
+  <nav aria-label="团餐调度环节"><a href="#orders">团餐订单</a><a href="#substitutions">套餐替代</a><a href="#windows">到站窗口</a>
+    <a href="#capacity">装车容量</a><a href="#allocation" aria-current="page">备用递补</a><a href="#reconcile">份数对账</a><a href="#archive">交接签单</a></nav>
+  <div class="aisle-bottom"><small>发餐调度</small><code>{{ project }}</code></div>
+</aside>
+<div class="sheet">
+<header class="dispatch-head"><div><span class="batch" id="batch-name"></span><h1>发餐波次板</h1></div>
+  <form id="operate"><label>样例 <select id="sample">{% for value,label in samples.items() %}<option value="{{ value }}"{% if value==sample %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <button type="button" id="pick-file">导入排班</button><input type="file" id="upload" accept=".json,application/json" hidden><button class="accent">计算发餐</button></form></header>
+<main>
+  <div class="kpis" id="metrics" aria-label="份数统计"></div>
+  <section class="panel board-panel"><div class="section-head"><h2>各波次交接</h2><label>波次 <select id="wave-filter"></select></label></div><div id="wave-board"></div></section>
+  <div class="bottom-grid">
+    <section class="panel dispatch-detail"><div class="section-head"><h2 id="detail-title">备用递补</h2><span id="active-order"></span></div><div id="detail"></div></section>
+    <section class="panel stock-detail"><div class="section-head"><h2>备用餐核量</h2><span>份</span></div><div id="stock"></div></section>
+  </div>
+</main>
+<footer><strong id="balance"></strong><span id="notice" role="status"></span><span id="version"></span></footer>
+</div>
+</div>
+<script id="initial" type="application/json">{{ initial | tojson }}</script>
+</body></html>

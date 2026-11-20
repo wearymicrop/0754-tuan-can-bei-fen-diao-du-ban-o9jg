@@ -1,0 +1,9 @@
+:root {
+  color-scheme:light;
+  --bg:#f4ebde; --sheet:#fffaf0; --oat:#f7eede; --column:#f2e5d6; --border:#ddcbb6;
+  --ink:#392820; --faint:#755d50; --accent:#a93927; --accent-ink:#fff9ed; --halo:#efd0b9;
+  --shipped:#24644b; --short:#9e5424; --disputed:#913845; --lead:#553627;
+  --sans:"PingFang SC","Microsoft YaHei",sans-serif; --serif:"Songti SC","Noto Serif CJK SC",serif;
+  --num:ui-monospace,Menlo,monospace; --rail:192px; --lane-gap:13px; --round:16px; --pill:999px;
+  --paper-shadow:0 2px 0 #ecd6bd;
+}
